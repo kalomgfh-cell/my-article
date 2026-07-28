@@ -1,28 +1,29 @@
 import os
 
-base_url = "https://kalomgfh-cell.github.io/my-article"
+# GitHub仓库地址
+base_url = "https://github.com/kalomgfh-cell/my-article/blob/main"
 
 urls = []
 
+# 当前文件夹
 current_dir = os.getcwd()
 
 for root, dirs, files in os.walk(current_dir):
+
     for file in files:
 
-        if file.endswith(".html"):
+        # 只生成MD文件
+        if file.endswith(".md"):
 
             full_path = os.path.join(root, file)
 
-            # 获取相对于 my-article 的路径
+            # 转换相对路径
             relative_path = os.path.relpath(full_path, current_dir)
 
-            # Windows路径改成网址格式
+            # Windows路径转换成网址路径
             relative_path = relative_path.replace("\\", "/")
 
-            # 跳过首页
-            if relative_path != "index.html":
-
-                urls.append(f"{base_url}/{relative_path}")
+            urls.append(f"{base_url}/{relative_path}")
 
 
 with open("sitemap.xml", "w", encoding="utf-8") as f:
@@ -31,6 +32,7 @@ with open("sitemap.xml", "w", encoding="utf-8") as f:
     f.write('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
 
     for url in urls:
+
         f.write("  <url>\n")
         f.write(f"    <loc>{url}</loc>\n")
         f.write("  </url>\n")
@@ -38,4 +40,4 @@ with open("sitemap.xml", "w", encoding="utf-8") as f:
     f.write("</urlset>\n")
 
 
-print("sitemap.xml生成完成，共生成", len(urls), "个地址")
+print("sitemap.xml生成完成，共生成", len(urls), "个MD地址")
