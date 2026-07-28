@@ -4,18 +4,25 @@ base_url = "https://kalomgfh-cell.github.io/my-article"
 
 urls = []
 
-for root, dirs, files in os.walk("."):
+current_dir = os.getcwd()
+
+for root, dirs, files in os.walk(current_dir):
     for file in files:
+
         if file.endswith(".html"):
-            path = os.path.join(root, file)
 
-            # 转换成网站路径
-            path = path.replace(".\\", "")
-            path = path.replace("\\", "/")
+            full_path = os.path.join(root, file)
 
-            # 跳过首页（可选）
-            if path != "index.html":
-                urls.append(f"{base_url}/{path}")
+            # 获取相对于 my-article 的路径
+            relative_path = os.path.relpath(full_path, current_dir)
+
+            # Windows路径改成网址格式
+            relative_path = relative_path.replace("\\", "/")
+
+            # 跳过首页
+            if relative_path != "index.html":
+
+                urls.append(f"{base_url}/{relative_path}")
 
 
 with open("sitemap.xml", "w", encoding="utf-8") as f:
