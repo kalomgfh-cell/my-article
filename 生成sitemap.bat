@@ -3,21 +3,28 @@ chcp 65001 >nul
 
 echo 正在生成 sitemap.xml...
 
-(
-echo ^<?xml version="1.0" encoding="UTF-8"?^>
-echo ^<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"^>
+echo ^<?xml version="1.0" encoding="UTF-8"?^> > sitemap.xml
+echo ^<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"^> >> sitemap.xml
 
-for /r %%i in (*.html) do (
-    if /i not "%%~nxi"=="index.html" (
-        echo ^<url^>
-        echo ^<loc^>https://kalomgfh-cell.github.io/my-article/%%~pi%%~nxi^</loc^>
-        echo ^</url^>
-    )
+
+for /r %%a in (*.html) do (
+
+    set "file=%%a"
+
+    call set "path=%%file:%cd%\=%%"
+
+    call echo ^<url^> >> sitemap.xml
+
+    call echo ^<loc^>https://kalomgfh-cell.github.io/my-article/%%path:\=/^</loc^> >> sitemap.xml
+
+    call echo ^</url^> >> sitemap.xml
+
 )
 
-echo ^</urlset^>
 
-) > sitemap.xml
+echo ^</urlset^> >> sitemap.xml
 
+
+echo.
 echo sitemap.xml生成完成
 pause
