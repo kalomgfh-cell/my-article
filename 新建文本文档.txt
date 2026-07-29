@@ -1,0 +1,1539 @@
+import os
+import openpyxl
+import random
+import datetime
+
+
+
+# =========================
+# V10 基础设置
+# =========================
+
+
+excel_file = "标题库.xlsx"
+
+
+output_folder = "football"
+
+
+image_file = "../99tee.png"
+
+
+
+github_base = (
+    "https://github.com/"
+    "kalomgfh-cell/"
+    "my-article/"
+    "blob/main/"
+    "football/"
+)
+
+
+
+today=datetime.date.today().strftime(
+    "%Y-%m-%d"
+)
+
+
+
+
+# =========================
+# 创建目录
+# =========================
+
+
+if not os.path.exists(output_folder):
+
+    os.makedirs(output_folder)
+
+
+
+
+
+# =========================
+# 读取标题
+# =========================
+
+
+wb=openpyxl.load_workbook(
+    excel_file
+)
+
+
+ws=wb.active
+
+
+
+titles=[]
+
+
+
+for row in ws.iter_rows(
+    min_row=2,
+    values_only=True
+):
+
+    if row[0]:
+
+        title=str(row[0]).strip()
+
+
+        if title:
+
+            titles.append(title)
+
+
+
+titles=list(
+    dict.fromkeys(titles)
+)
+
+
+
+print(
+    "标题数量:",
+    len(titles)
+)
+
+
+
+
+
+
+# =========================
+# 文件名处理
+# =========================
+
+
+def clean_filename(name):
+
+
+    chars=[
+        "\\",
+        "/",
+        ":",
+        "*",
+        "?",
+        "\"",
+        "<",
+        ">",
+        "|"
+    ]
+
+
+    for c in chars:
+
+        name=name.replace(
+            c,
+            "-"
+        )
+
+
+    return name.strip()
+
+
+
+
+
+# =========================
+# 提取关键词
+# =========================
+
+
+def get_keyword(title):
+
+
+    title=title.replace(
+        "：",
+        "-"
+    )
+
+
+
+    if "-" in title:
+
+        return title.split("-")[-1].strip()
+
+
+
+    return title.strip()
+
+
+
+
+# =========================
+# V10分类
+# =========================
+
+
+def get_category(title):
+
+
+    t=title.lower()
+
+
+
+    sports_event=[
+
+        "足球",
+        "篮球",
+        "nba",
+        "cba",
+        "世界杯",
+        "欧冠",
+        "赛事",
+        "比赛",
+        "比分",
+        "球队",
+        "联赛"
+
+    ]
+
+
+
+    sports_platform=[
+
+        "滚球",
+        "盘口",
+        "赔率",
+        "买球",
+        "体育网站",
+        "体育平台",
+        "体育app"
+
+    ]
+
+
+
+    digital=[
+
+        "pg",
+        "jdb",
+        "cq9",
+        "ag",
+        "mg",
+        "bbin",
+        "电子",
+        "游戏",
+        "app",
+        "官网"
+
+    ]
+
+
+
+    for x in sports_event:
+
+        if x in t:
+
+            return "sports_event"
+
+
+
+    for x in sports_platform:
+
+        if x in t:
+
+            return "sports_platform"
+
+
+
+    for x in digital:
+
+        if x in t:
+
+            return "digital"
+
+
+
+    return "normal"
+
+# =========================
+# V10章节库
+# =========================
+
+
+section_pool={
+
+
+"sports_event":[
+
+
+[
+"文章介绍",
+"赛事背景",
+"球队表现",
+"数据分析",
+"未来趋势"
+],
+
+
+[
+"项目说明",
+"历史变化",
+"比赛数据",
+"影响因素",
+"发展方向"
+],
+
+
+[
+"赛事介绍",
+"行业背景",
+"数据观察",
+"用户关注",
+"未来变化"
+]
+
+
+],
+
+
+
+
+"sports_platform":[
+
+
+[
+"相关说明",
+"行业背景",
+"平台特点",
+"用户观察",
+"未来趋势"
+],
+
+
+[
+"文章介绍",
+"发展历程",
+"功能分析",
+"市场变化",
+"趋势分析"
+],
+
+
+[
+"内容介绍",
+"应用环境",
+"服务特点",
+"数据观察",
+"发展方向"
+]
+
+
+],
+
+
+
+
+
+"digital":[
+
+
+[
+"文章介绍",
+"行业背景",
+"内容特点",
+"数据分析",
+"发展趋势"
+],
+
+
+[
+"相关说明",
+"技术发展",
+"平台特点",
+"用户体验",
+"未来变化"
+],
+
+
+[
+"内容介绍",
+"应用环境",
+"技术分析",
+"市场观察",
+"未来方向"
+]
+
+
+],
+
+
+
+
+"normal":[
+
+
+[
+"文章介绍",
+"发展背景",
+"主要特点",
+"数据分析",
+"未来趋势"
+],
+
+
+[
+"行业说明",
+"核心内容",
+"影响因素",
+"趋势观察",
+"发展方向"
+],
+
+
+[
+"相关介绍",
+"发展变化",
+"应用分析",
+"市场观察",
+"未来方向"
+]
+
+
+]
+
+
+}
+
+
+
+
+
+# =========================
+# V10随机开头
+# =========================
+
+
+intro_pool=[
+
+
+"随着互联网技术不断发展，{key}相关信息逐渐受到关注。近年来，信息传播方式、技术环境以及用户需求都发生了变化。",
+
+
+"在数字化快速发展的背景下，{key}成为部分用户关注的方向。通过资料整理，可以观察相关领域的发展特点。",
+
+
+"近年来互联网应用持续升级，{key}随着技术进步产生新的变化，不同阶段的发展方向存在一定差异。",
+
+
+"随着网络环境不断完善，{key}相关内容正在经历新的调整，技术应用和信息管理成为重要因素。",
+
+
+"当前信息技术快速发展，各类行业都在进行数字化优化，{key}也随着环境变化不断调整。"
+
+
+]
+
+
+
+
+
+# =========================
+# V10背景库
+# =========================
+
+
+background_pool=[
+
+
+"{key}的发展受到技术升级、市场环境以及用户需求变化等多方面影响。随着网络基础设施完善，相关内容逐渐形成新的特点。",
+
+
+"从发展过程来看，{key}并不是固定不变的，互联网环境变化以及技术能力提升都会影响相关方向。",
+
+
+"行业环境变化对{key}产生影响，技术创新、信息传播方式以及用户习惯改变都是重要因素。",
+
+
+"随着数字化进程推进，数据管理能力和技术应用水平逐渐成为影响发展的重要参考。",
+
+
+"不同阶段的发展重点有所区别，需要结合技术环境和实际需求进行观察。"
+
+
+]
+
+
+
+
+
+# =========================
+# V10特点库
+# =========================
+
+
+feature_pool=[
+
+
+"{key}通常涉及内容展示、技术表现、系统设计以及用户体验等多个方面，不同方向会形成不同特点。",
+
+
+"从实际情况来看，{key}越来越重视稳定性、效率以及体验优化，技术能力成为重要参考因素。",
+
+
+"相关内容的发展不仅依赖技术能力，同时也受到用户需求变化影响，数据整理和内容优化逐渐成为重要方向。",
+
+
+"现代信息服务更加关注系统稳定性、内容质量以及用户体验，这些因素都会影响相关领域的发展。"
+
+
+]
+
+
+
+
+
+# =========================
+# V10发展变化库
+# =========================
+
+
+history_pool=[
+
+
+"从历史发展来看，互联网技术推动相关领域经历多个阶段变化。从早期信息展示，到现在的数据化管理，技术升级改变了发展方式。",
+
+
+"随着移动互联网普及，用户获取信息的方式不断变化，相关行业逐渐形成新的发展模式。",
+
+
+"过去的发展更多依赖基础网络环境，而现在逐渐结合数据分析、智能工具以及自动化技术。",
+
+
+"技术进步让信息处理效率不断提高，相关领域也开始更加关注长期优化。"
+
+
+]
+
+
+
+
+
+# =========================
+# V10用户观察库
+# =========================
+
+
+user_pool=[
+
+
+"从用户角度来看，信息获取效率、内容质量以及使用体验成为关注重点。",
+
+
+"用户需求变化推动相关服务不断调整，信息呈现方式也逐渐丰富。",
+
+
+"随着用户习惯改变，行业需要不断优化内容结构，提高信息价值。",
+
+
+"用户体验已经成为影响相关领域发展的重要因素之一。"
+
+
+]
+
+
+
+
+
+# =========================
+# V10分析库
+# =========================
+
+
+analysis_pool=[
+
+
+"通过资料整理可以发现，{key}的发展变化与技术环境密切相关，数据分析能够帮助观察相关趋势。",
+
+
+"从数据观察角度来看，{key}受到市场变化、用户行为以及技术升级等因素共同影响。",
+
+
+"信息时代中，数据已经成为分析变化的重要工具，通过整理资料可以进一步了解相关特点。",
+
+
+"综合多个因素来看，技术能力、市场环境以及用户需求共同影响相关方向的发展。"
+
+
+]
+
+
+
+
+
+# =========================
+# V10趋势库
+# =========================
+
+
+trend_pool=[
+
+
+"未来随着人工智能、大数据以及移动互联网技术继续发展，{key}相关领域可能进一步向智能化方向变化。",
+
+
+"从长期发展来看，技术创新和用户体验优化仍然会影响{key}的发展方向。",
+
+
+"未来相关领域可能更加重视效率提升、内容优化以及技术融合。",
+
+
+"随着智能工具不断普及，数据处理和自动化能力可能成为未来发展的重要方向。"
+
+
+]
+
+
+
+
+
+# =========================
+# V10总结库
+# =========================
+
+
+summary_pool=[
+
+
+"通过以上分析，可以了解到{key}的发展背景、主要特点以及未来变化方向。随着技术持续升级，相关领域仍会不断调整和优化。",
+
+
+"本文围绕{key}进行了资料整理和内容分析，希望帮助读者更全面了解相关信息变化。",
+
+
+"综合来看，{key}的发展受到技术、市场以及用户需求共同影响，未来仍可能出现新的变化。"
+
+
+]
+
+# =========================
+# V10 分类扩展内容
+# =========================
+
+
+sports_extra=[
+
+
+"体育相关内容通常涉及赛事资料、球队表现、历史数据以及比赛记录等多个方面。通过公开资料整理，可以更加全面观察相关变化。",
+
+
+"现代体育行业不仅关注比赛结果，同时也重视数据统计、赛事分析以及信息传播方式。",
+
+
+"随着数据技术发展，体育领域逐渐结合智能分析工具，提高信息整理和观察效率。"
+
+
+]
+
+
+
+
+
+sports_platform_extra=[
+
+
+"体育信息服务通常涉及数据展示、赛事资料、用户体验以及技术支持等方面。",
+
+
+"随着互联网发展，体育平台逐渐重视数据能力、访问体验以及信息更新效率。",
+
+
+"相关服务模式正在结合移动端技术和数据分析能力进行优化。"
+
+
+]
+
+
+
+
+
+digital_extra=[
+
+
+"数字内容相关领域通常涉及系统设计、技术应用、内容展示以及用户体验等方面。",
+
+
+"随着技术不断升级，数字内容越来越重视稳定性、效率以及整体体验优化。",
+
+
+"人工智能、大数据以及自动化工具正在影响数字内容的发展方式。"
+
+
+]
+
+
+
+
+
+normal_extra=[
+
+
+"不同领域的发展受到技术、市场以及用户需求共同影响，需要结合实际情况进行分析。",
+
+
+"随着数字化进程推进，多个行业正在通过技术升级提升效率。",
+
+
+"信息管理能力和技术创新逐渐成为影响行业发展的重要因素。"
+
+
+]
+
+
+
+
+
+
+
+# =========================
+# V10 FAQ升级
+# =========================
+
+
+def make_faq(key):
+
+
+    faq=[
+
+
+
+f"""### {key}主要有哪些特点？
+
+{key}相关内容通常包含技术表现、信息整理、系统设计以及用户体验等方面。不同应用场景可能存在不同特点。""",
+
+
+
+f"""### 如何观察{key}的发展变化？
+
+可以结合公开资料、行业变化、技术升级以及数据表现等多个方向进行分析。""",
+
+
+
+f"""### {key}未来可能有哪些发展趋势？
+
+随着互联网技术持续发展，相关领域可能继续进行优化和调整。""",
+
+
+
+f"""### 哪些因素会影响{key}的发展？
+
+技术环境、用户需求、市场变化以及信息传播方式都会对相关方向产生影响。"""
+
+
+
+    ]
+
+
+    return "\n\n".join(faq)
+
+
+
+
+
+
+
+# =========================
+# V10 示例代码库
+# =========================
+
+
+code_pool=[
+
+
+
+'''info = {
+
+    "keyword":"{key}",
+
+    "year":2026,
+
+    "category":"analysis"
+
+}
+
+
+print(info)
+
+''',
+
+
+
+
+
+'''data=[
+
+    "{key}",
+
+    "technology",
+
+    "information"
+
+]
+
+
+for item in data:
+
+    print(item)
+
+''',
+
+
+
+
+
+'''article={
+
+    "title":"{key}",
+
+    "status":"generated",
+
+    "time":"2026"
+
+}
+
+
+print(article)
+
+''',
+
+
+
+
+
+'''result={
+
+    "topic":"{key}",
+
+    "type":"content",
+
+    "version":"V10"
+
+}
+
+
+print(result)
+
+'''
+
+]
+
+
+
+
+
+
+
+# =========================
+# V10 SEO描述
+# =========================
+
+
+def make_description(key):
+
+
+    return (
+
+        f"{key}相关信息整理，"
+        "包含发展背景、内容特点、"
+        "数据分析、行业观察以及未来趋势。"
+
+    )
+
+
+
+
+
+# =========================
+# V10 分类选择函数
+# =========================
+
+
+def get_extra(category):
+
+
+    if category=="sports_event":
+
+
+        return random.choice(
+            sports_extra
+        )
+
+
+    elif category=="sports_platform":
+
+
+        return random.choice(
+            sports_platform_extra
+        )
+
+
+    elif category=="digital":
+
+
+        return random.choice(
+            digital_extra
+        )
+
+
+    else:
+
+
+        return random.choice(
+            normal_extra
+        )
+
+# =========================
+# V10 开始生成文章
+# =========================
+
+
+all_files=[]
+
+
+for i,title in enumerate(titles):
+
+
+    key=get_keyword(title)
+
+
+    category=get_category(title)
+
+
+
+    # 获取章节
+
+    sections=random.choice(
+        section_pool[category]
+    )
+
+
+
+    # 获取分类扩展
+
+    extra=get_extra(
+        category
+    )
+
+
+
+    intro=random.choice(
+
+        [
+            "随着互联网技术快速发展，{key}相关内容逐渐进入更多用户视野。近年来，信息传播方式、技术应用环境以及用户需求不断变化，相关领域也持续调整。",
+
+            "在数字化环境不断变化的背景下，{key}成为部分用户关注的方向。通过资料整理和信息分析，可以观察相关内容的发展特点。",
+
+            "近年来互联网应用持续升级，{key}随着技术进步产生新的变化，不同阶段的发展方向存在一定差异。"
+
+        ]
+
+    ).format(
+        key=key
+    )
+
+
+
+    background=random.choice(
+
+        [
+            "{key}的发展受到技术升级、市场环境以及用户需求变化等多方面影响。",
+
+            "从发展过程来看，{key}并不是固定不变的，互联网环境变化以及技术能力提升都会影响相关方向。",
+
+            "行业环境变化对{key}产生影响，技术创新、信息传播方式以及用户习惯改变都是重要因素。"
+
+        ]
+
+    ).format(
+        key=key
+    )
+
+
+
+    feature=random.choice(
+
+        [
+            "{key}通常涉及内容展示、技术表现、系统设计以及用户体验等多个方面，不同方向会形成不同特点。",
+
+            "从实际情况来看，{key}越来越重视稳定性、效率以及体验优化，技术能力成为重要参考因素。",
+
+            "相关内容的发展不仅依赖技术能力，同时也受到用户需求变化影响，数据整理和内容优化逐渐成为重要方向。"
+
+        ]
+
+    ).format(
+        key=key
+    )
+
+
+
+    analysis=random.choice(
+
+        [
+            "通过资料整理可以发现，{key}的发展变化与技术环境密切相关，数据分析能够帮助观察相关趋势。",
+
+            "从数据观察角度来看，{key}受到市场变化、用户行为以及技术升级等因素共同影响。",
+
+            "信息时代中，数据已经成为分析变化的重要工具，通过整理资料可以进一步了解相关特点。"
+
+        ]
+
+    ).format(
+        key=key
+    )
+
+
+
+    trend=random.choice(
+        trend_pool
+    ).format(
+        key=key
+    )
+
+
+
+    summary=random.choice(
+        summary_pool
+    ).format(
+        key=key
+    )
+
+
+
+    code=random.choice(
+        code_pool
+    ).format(
+        key=key
+    )
+
+
+
+    description=make_description(
+        key
+    )
+
+
+
+
+    # =====================
+    # Markdown正文
+    # =====================
+
+
+    article=""
+
+
+
+    # 图片
+
+    article += f"![99tee]({image_file})\n\n"
+
+
+
+    # 标题
+
+    article += "# "+title+"\n\n"
+
+
+
+    # SEO描述
+
+    article += "> "+description+"\n\n"
+
+
+
+
+    # 第一部分
+
+    article += "## "+sections[0]+"\n\n"
+
+    article += intro+"\n\n"
+
+
+
+
+    # 第二部分
+
+    article += "## "+sections[1]+"\n\n"
+
+    article += background+"\n\n"
+
+
+
+
+    # 第三部分
+
+    article += "## "+sections[2]+"\n\n"
+
+    article += feature+"\n\n"
+
+
+
+    # 分类扩展
+
+    article += extra+"\n\n"
+
+
+
+
+    # 数据分析
+
+    article += "## 数据分析\n\n"
+
+    article += analysis+"\n\n"
+
+
+
+
+    # 示例代码
+
+    article += "## 示例代码\n\n"
+
+    article += "```python\n"
+
+    article += code
+
+    article += "\n```\n\n"
+
+
+
+
+
+    # FAQ
+
+    article += "## 常见问题\n\n"
+
+    article += make_faq(
+        key
+    )
+
+    article += "\n\n"
+
+
+
+
+    # 趋势
+
+    article += "## "+sections[4]+"\n\n"
+
+    article += trend+"\n\n"
+
+
+
+
+    # 总结
+
+    article += "## 总结\n\n"
+
+    article += summary
+
+
+
+
+
+    # =====================
+    # 保存md
+    # =====================
+
+
+    filename=clean_filename(title)+".md"
+
+
+
+    filepath=os.path.join(
+
+        output_folder,
+
+        filename
+
+    )
+
+
+
+    with open(
+
+        filepath,
+
+        "w",
+
+        encoding="utf-8"
+
+    ) as f:
+
+
+        f.write(article)
+
+
+
+
+    all_files.append(
+        filename
+    )
+
+
+
+    print(
+        "生成:",
+        filename
+    )
+
+
+
+
+
+print(
+
+    "V10 Markdown生成完成:",
+
+    len(all_files)
+
+)
+
+# =========================
+# V10 第五部分
+# 生成 sitemap.xml
+# =========================
+
+
+sitemap_file="sitemap.xml"
+
+
+
+with open(
+    sitemap_file,
+    "w",
+    encoding="utf-8"
+) as f:
+
+
+    f.write(
+'''<?xml version="1.0" encoding="UTF-8"?>
+
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+'''
+    )
+
+
+
+    for file in all_files:
+
+
+        f.write(
+f'''
+<url>
+
+<loc>{github_base}{file}</loc>
+
+</url>
+
+'''
+        )
+
+
+
+    f.write(
+'''
+</urlset>
+'''
+    )
+
+
+
+print(
+    "sitemap.xml生成完成"
+)
+
+
+
+
+
+# =========================
+# 生成 GitHub 首页 index.html
+# =========================
+
+
+index_html="""
+
+
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+
+<head>
+
+
+<meta charset="UTF-8">
+
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+
+<title>文章中心</title>
+
+
+
+<style>
+
+
+body{
+
+
+max-width:900px;
+
+margin:auto;
+
+padding:20px;
+
+font-family:
+
+Arial,
+
+"Microsoft YaHei";
+
+line-height:1.8;
+
+
+}
+
+
+
+h1{
+
+
+text-align:center;
+
+
+}
+
+
+
+.article{
+
+
+border-bottom:1px solid #ddd;
+
+padding:12px 0;
+
+
+}
+
+
+
+a{
+
+
+color:#0366d6;
+
+text-decoration:none;
+
+
+}
+
+
+
+a:hover{
+
+
+text-decoration:underline;
+
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+
+<h1>
+
+文章中心
+
+</h1>
+
+
+<p>
+
+更新时间：
+
+"""
+
+index_html += today
+
+
+index_html += """
+
+</p>
+
+
+"""
+
+
+
+
+
+# =========================
+# 添加文章列表
+# =========================
+
+
+for file in all_files:
+
+
+    name=file.replace(
+        ".md",
+        ""
+    )
+
+
+    index_html += f"""
+
+
+<div class="article">
+
+
+<a href="football/{file}">
+
+
+{name}
+
+
+</a>
+
+
+</div>
+
+
+"""
+
+
+
+
+
+index_html += """
+
+</body>
+
+
+</html>
+
+
+"""
+
+
+
+
+
+
+with open(
+    "index.html",
+    "w",
+    encoding="utf-8"
+) as f:
+
+
+    f.write(
+        index_html
+    )
+
+
+
+print(
+    "index.html生成完成"
+)
+
+
+
+
+
+
+
+# =========================
+# 生成 README.md
+# =========================
+
+
+readme="# 文章目录\n\n"
+
+
+
+for file in all_files:
+
+
+    name=file.replace(
+        ".md",
+        ""
+    )
+
+
+    readme += f"- [{name}](football/{file})\n"
+
+
+
+
+
+with open(
+    "README.md",
+    "w",
+    encoding="utf-8"
+) as f:
+
+
+    f.write(
+        readme
+    )
+
+
+
+print(
+    "README.md生成完成"
+)
+
+
+
+
+
+
+
+# =========================
+# 最终提示
+# =========================
+
+
+print(
+"""
+
+==============================
+V10 生成完成
+==============================
+
+
+生成文件:
+
+
+✔ football/*.md
+
+✔ sitemap.xml
+
+✔ index.html
+
+✔ README.md
+
+
+文章数量:
+
+""",
+len(all_files)
+
+)
